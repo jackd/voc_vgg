@@ -18,6 +18,7 @@ class VocVggDataSource(DataSource):
 
         from pascal_voc.dataset import PascalVocDataset
         image_dims = self.image_dims
+        repeat = mode == 'train'
         shuffle = True
         if mode in {'eval', 'val', 'predict', 'infer', 'test'}:
             mode = 'val'
@@ -29,6 +30,9 @@ class VocVggDataSource(DataSource):
         n_keys = len(keys)
         keys = tf.convert_to_tensor(keys, dtype=tf.string)
         dataset = tf.data.Dataset.from_tensor_slices(keys)
+
+        if repeat:
+            dataset = dataset.repeat()
 
         if shuffle:
             dataset = dataset.shuffle(n_keys)
