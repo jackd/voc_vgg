@@ -61,8 +61,8 @@ class VggKerasInferenceModel(VggInferenceModel):
         saver = tf.train.Saver()
         sess = tf.keras.backend.get_session()
         fcn8s_vars = tf.get_collection(
-            tf.TRAINABLE_VARIABLES, scope='vgg_fcn8s')
-        sess.run([v.initializer] for v in fcn8s_vars)
+            tf.GraphKeys.TRAINABLE_VARIABLES, scope='vgg_fcn8s')
+        sess.run([v.initializer for v in fcn8s_vars])
         saver.save(sess, os.path.join(folder, 'model'))
         tf.reset_default_graph()
         return tf.train.latest_checkpoint(folder)
