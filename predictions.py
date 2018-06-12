@@ -29,8 +29,8 @@ def save_predictions(coord):
         elif isinstance(predictions, dict):
             predictions = predictions.copy()
             predictions['key'] = key
-            predictions['h'] = features['h']
-            predictions['w'] = features['w']
+            predictions['height'] = features['height']
+            predictions['width'] = features['width']
         else:
             raise RuntimeError(
                 'Unrecognized predictions type: "%s"' % predictions)
@@ -47,7 +47,8 @@ def save_predictions(coord):
         key = prediction['key']
         pred = prediction['pred']
         oh, ow = pred.shape
-        pred = central_crop(oh, ow, pred['h'], pred['w'], pred)
+        pred = central_crop(
+            oh, ow, prediction['height'], prediction['width'], pred)
         pred = Image.fromarray(pred.astype(np.uint8))
         pred.save(os.path.join(predictions_dir, '%s.png' % key))
         spinner.next()
