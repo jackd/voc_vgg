@@ -41,7 +41,7 @@ def save_predictions(coord):
         pred = Image.fromarray(pred.astype(np.uint8))
         pred.save(os.path.join(predictions_dir, '%s.png' % key))
         spinner.next()
-    spinner.close()
+    spinner.finish()
 
 
 def get_saved_predictions(coord):
