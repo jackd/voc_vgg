@@ -17,7 +17,7 @@ class VocVggDataSource(DataSource):
         import tensorflow as tf
 
         from pascal_voc.dataset import PascalVocDataset
-        image_dims = self.image_dims
+        image_dims = self.image_dims if mode == 'train' else None
         repeat = mode == 'train'
         shuffle = True
         if mode in {'eval', 'val', 'predict', 'infer', 'test'}:
