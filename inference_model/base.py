@@ -15,7 +15,19 @@ if not os.path.isdir(ws_dir):
     os.makedirs(ws_dir)
 
 
-class VggInferenceModel(InferenceModel):
+class SegmentationInferenceModel(InferenceModel):
+    def get_predictions(self, features, inference):
+        logits = inference
+        probs = tf.nn.softmax(logits)
+        pred = tf.argmax(logits, axis=-1)
+        return dict(pred=pred, probs=probs)
+
+    def prediction_vis(self, prediction_data):
+        from tf_template.visualization import VisImage
+        return VisImage(prediction_data['pred'])
+
+
+class VggInferenceModel(SegmentationInferenceModel):
     def __init__(self, n_classes=21):
         self.n_classes = n_classes
 
@@ -35,16 +47,6 @@ class VggInferenceModel(InferenceModel):
     @property
     def implementation(self):
         raise NotImplementedError('Abstract property')
-
-    def get_predictions(self, features, inference):
-        logits = inference
-        probs = tf.nn.softmax(logits)
-        pred = tf.argmax(logits, axis=-1)
-        return dict(pred=pred, probs=probs)
-
-    def prediction_vis(self, prediction_data):
-        from tf_template.visualization import VisImage
-        return VisImage(prediction_data['pred'])
 
     @property
     def _warm_start_folder(self):

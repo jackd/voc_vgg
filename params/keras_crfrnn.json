@@ -1,0 +1,7 @@
+{
+  "inference_model": {
+    "implementation": "crf_rnn",
+    "base_coord": "keras_base",
+    "initialize_with_base_variables": true
+  }
+}
