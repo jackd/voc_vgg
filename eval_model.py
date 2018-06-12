@@ -22,11 +22,11 @@ def get_eval_model(n_classes=21):
         accuracy = tf.metrics.accuracy(labels, pred)
         mean_iou = tf.metrics.mean_iou(labels, pred, n_classes)
         mean_per_class_accuracy = tf.metrics.mean_per_class_accuracy(
-	    labels, pred, n_classes)
+            labels, pred, n_classes)
         return dict(
-	    accuracy=accuracy,
-	    mean_iou=mean_iou,
+            accuracy=accuracy,
+            mean_iou=mean_iou,
             mean_per_class_accuracy=mean_per_class_accuracy
-	)
+        )
 
     return EvalModel(inference_loss, get_eval_metric_ops)

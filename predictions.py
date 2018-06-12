@@ -8,6 +8,12 @@ def get_predictions_dir(coord):
     return os.path.join(coord.model_dir, 'predictions')
 
 
+def central_crop(oh, ow, h, w, image):
+    hs = (oh - h) // 2
+    ws = (ow - w) // 2
+    return image[hs: hs + h, ws: ws + w]
+
+
 def save_predictions(coord):
     import numpy as np
     import tensorflow as tf
@@ -23,6 +29,8 @@ def save_predictions(coord):
         elif isinstance(predictions, dict):
             predictions = predictions.copy()
             predictions['key'] = key
+            predictions['h'] = features['h']
+            predictions['w'] = features['w']
         else:
             raise RuntimeError(
                 'Unrecognized predictions type: "%s"' % predictions)
@@ -38,6 +46,8 @@ def save_predictions(coord):
             lambda: coord.get_inputs(tf.estimator.ModeKeys.PREDICT)):
         key = prediction['key']
         pred = prediction['pred']
+        oh, ow = pred.shape
+        pred = central_crop(oh, ow, pred['h'], pred['w'], pred)
         pred = Image.fromarray(pred.astype(np.uint8))
         pred.save(os.path.join(predictions_dir, '%s.png' % key))
         spinner.next()
@@ -55,6 +65,7 @@ def get_saved_predictions(coord):
     dataset = FileDataset(predictions_dir)
     dataset = dataset.map_keys(lambda x: '%s.png' % x, lambda x: x[:-4])
     dataset = dataset.map(lambda fp: Image.open(fp))
+    return dataset
 
 
 def vis_saved_predictions(coord):
@@ -70,7 +81,7 @@ def vis_saved_predictions(coord):
             image = np.array(gt.load_image())
             seg = np.array(gt.load_class_segmentation())
             inf = np.array(inf)
-            correct = seg == inf
+            correct = np.equal(seg, inf)
             fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2, 2)
             ax0.imshow(image)
             ax1.imshow(seg)
