@@ -37,26 +37,11 @@ class VocVggDataSource(DataSource):
         if shuffle:
             dataset = dataset.shuffle(n_keys)
 
-        if image_dims is None:
-            if batch_size is not None and batch_size != 1 or mode == 'train':
-                raise ValueError(
-                    'image_dims must be defined if batch_size isn\'t 1 or '
-                    'mode is train.')
-
-            def map_fn_np(key):
-                example = dids_ds[key]
-                image = np.array(example.load_image())
-                labels = np.array(example.load_class_segmentation())
-                return image, labels
-        else:
-            h_out, w_out = image_dims
-
-            def map_fn_np(key):
-                example = dids_ds[key]
-                image = np.array(example.load_image())
-                labels = np.array(example.load_class_segmentation())
-
-                return image, labels
+        def map_fn_np(key):
+            example = dids_ds[key]
+            image = np.array(example.load_image())
+            labels = np.array(example.load_class_segmentation())
+            return image, labels
 
         def map_fn_tf(key):
             image, labels = tf.py_func(
