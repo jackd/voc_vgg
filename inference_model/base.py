@@ -105,7 +105,9 @@ class VggInferenceModel(SegmentationInferenceModel):
         return upsample
 
     def get_inference(self, features, mode):
-        return self._get_inference(features['image'], mode, load_weights=False)
+        logits = self._get_inference(
+            features['image'], mode, load_weights=False)
+        return logits
 
     def get_warm_start_settings(self):
         folder = self._warm_start_folder

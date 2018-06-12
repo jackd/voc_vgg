@@ -71,8 +71,8 @@ class VggSlimInferenceModel(VggInferenceModel):
         with graph.as_default():
             image = tf.placeholder(shape=(None, 224, 224, 3), dtype=tf.float32)
             self._get_inference(image, 'train', load_weights=True)
-            fcn8s_vars = tf.get_collection(
-                tf.GraphKeys.TRAINABLE_VARIABLES, scope='vgg_fcn8s')
+            # fcn8s_vars = tf.get_collection(
+            #     tf.GraphKeys.TRAINABLE_VARIABLES, scope='vgg_fcn8s')
             vgg_vars = tf.get_collection(
                 tf.GraphKeys.TRAINABLE_VARIABLES, scope='vgg')
             vgg_vars = [v for v in vgg_vars if 'fc' not in v.name]
