@@ -20,29 +20,13 @@ def get_eval_model(n_classes=21):
         pred = tf.boolean_mask(predictions['pred'], valid_mask)
         labels = tf.boolean_mask(labels['segmentation'], valid_mask)
         accuracy = tf.metrics.accuracy(labels, pred)
-
-        ious = []
-        for i in range(n_classes):
-            pi = tf.equal(pred, i)
-            li = tf.equal(labels, i)
-            intersection = tf.logical_and(pi, li)
-            union = tf.logical_or(pi, li)
-            intersection = tf.cast(intersection, tf.float32)
-            union = tf.cast(union, tf.float32)
-
-            intersection = tf.metrics.mean(tf.reduce_sum(intersection))
-            union = tf.metrics.mean(tf.reduce_sum(union))
-
-            with tf.control_dependencies([intersection[1], union[1]]):
-                iou_val = intersection[0] / union[0]
-                iou_op = tf.no_op()
-            ious.append((iou_val, iou_op))
-
-        iou_stack = tf.stack(tuple(iou[0] for iou in ious), axis=0)
-        mean_iou = tf.reduce_mean(iou_stack)
-        with tf.control_dependencies([mean_iou]):
-            mean_iou = (mean_iou, tf.no_op())
-
-        return dict(accuracy=accuracy, mean_iou=mean_iou)
+        mean_iou = tf.metrics.mean_iou(labels, pred, n_classes)
+        mean_per_class_accuracy = tf.metrics.mean_per_class_accuracy(
+	    labels, pred, n_classes)
+        return dict(
+	    accuracy=accuracy,
+	    mean_iou=mean_iou,
+            mean_per_class_accuracy=mean_per_class_accuracy
+	)
 
     return EvalModel(inference_loss, get_eval_metric_ops)
