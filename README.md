@@ -26,6 +26,3 @@ tensorboard --logdir=../_models
 
 ## Customize
 To customize, create your own `params` file and modify the existing deserializing functions to accomodate.
-
-## TODO
-* slim model.

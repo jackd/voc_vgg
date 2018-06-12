@@ -77,10 +77,12 @@ class VggSlimInferenceModel(VggInferenceModel):
                 tf.GraphKeys.TRAINABLE_VARIABLES, scope='vgg')
             vgg_vars = [v for v in vgg_vars if 'fc' not in v.name]
             loader = tf.train.Saver(var_list=vgg_vars)
-            saver = tf.train.Saver(var_list=fcn8s_vars + vgg_vars)
+            # saver = tf.train.Saver(var_list=fcn8s_vars + vgg_vars)
+            saver = tf.train.Saver()
         with tf.Session(graph=graph) as sess:
+            sess.run(tf.global_variables_initializer())
             loader.restore(sess, get_initial_checkpoint_path())
-            sess.run([v.initializer for v in fcn8s_vars])
+            # sess.run([v.initializer for v in fcn8s_vars])
             saver.save(sess, os.path.join(folder, 'model'))
         return tf.train.latest_checkpoint(folder)
 
