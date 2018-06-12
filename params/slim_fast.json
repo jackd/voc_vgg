@@ -1,0 +1,4 @@
+{
+  "inference_model": {"implementation": "slim"},
+  "train_model": {"learning_rate": 2e-4}
+}

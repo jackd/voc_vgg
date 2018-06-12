@@ -80,9 +80,9 @@ def vis_saved_predictions(coord):
     with zipped:
         for k, (gt, inf) in zipped.items():
             image = np.array(gt.load_image())
-            seg = np.array(gt.load_class_segmentation())
-            inf = np.array(inf)
-            correct = np.equal(seg, inf)
+            seg = np.array(gt.load_class_segmentation(), dtype=np.uint8)
+            inf = np.array(inf, dtype=np.uint8)
+            correct = np.equal(seg, inf).astype(np.uint8)
             fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2, 2)
             ax0.imshow(image)
             ax1.imshow(seg)
