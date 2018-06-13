@@ -62,7 +62,7 @@ def get_saved_predictions(coord):
     if not os.path.isdir(predictions_dir):
         raise RuntimeError(
             'No prediction data at "%s". '
-            'Have you run `--action=save_predictions`?')
+            'Have you run `--action=save_predictions`?' % predictions_dir)
     dataset = FileDataset(predictions_dir)
     dataset = dataset.map_keys(lambda x: '%s.png' % x, lambda x: x[:-4])
     dataset = dataset.map(lambda fp: Image.open(fp))
