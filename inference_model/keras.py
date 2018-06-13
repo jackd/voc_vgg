@@ -39,8 +39,6 @@ class VggKerasInferenceModel(VggInferenceModel):
             include_top=False, input_tensor=image,
             weights='imagenet' if load_weights else None)
         conv6 = model(image)
-        print(conv6.shape)
-        exit()
         graph = tf.get_default_graph()
         pool4 = graph.get_tensor_by_name('block4_pool/MaxPool:0')
         pool3 = graph.get_tensor_by_name('block3_pool/MaxPool:0')
