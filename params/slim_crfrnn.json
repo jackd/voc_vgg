@@ -2,6 +2,7 @@
   "inference_model": {
     "implementation": "crf_rnn",
     "base_coord": "slim_base",
-    "initialize_with_base_variables": true
+    "initialize_with_base_variables": true,
+    "fpi_kwargs": {"explicit_loop": false}
   }
 }
