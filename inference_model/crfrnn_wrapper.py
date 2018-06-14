@@ -2,6 +2,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import tensorflow as tf
+
 from .base import SegmentationInferenceModel
 from crfrnn.ops import unrolled_crf_rnn
 
@@ -20,6 +22,13 @@ class CrfRnnInferenceModel(SegmentationInferenceModel):
 
     def get_warm_start_settings(self):
         if self._warm_start_settings is None:
-            return self._base_model.get_warm_start_settings()
+            settings = self._base_model.get_warm_start_settings()
+            if isinstance(settings, tf.estimator.WarmsStartSettings):
+                settings = settings.ckpt_to_initialize_from
+
+            return tf.estimator.WarmStartSettings(
+                ckpt_to_initialize_from=settings,
+                vars_to_warm_start='vgg.*')
+
         else:
             return self._warm_start_settings
