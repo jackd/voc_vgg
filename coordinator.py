@@ -14,7 +14,7 @@ for d in (params_dir, models_dir):
         os.makedirs(d)
 
 
-def get_eval_metric_ops(predictions, labels, n_classes):
+def get_eval_metric_ops(predictions, labels):
     import tensorflow as tf
     n_classes = 21
     valid_mask = labels['valid_mask']
