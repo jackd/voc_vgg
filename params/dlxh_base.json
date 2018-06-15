@@ -3,7 +3,7 @@
     "implementation": "deeplab",
     "model_variant": "xception_65"
   },
-  "train_model": {
-    "batch_size": 4
+  "data_source": {
+    "image_dims": [224, 224]
   }
 }

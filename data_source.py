@@ -11,7 +11,7 @@ IMAGENET_MEAN = (123.68, 116.78, 103.94)
 
 class VocVggDataSource(DataSource):
     def __init__(self, image_dims=(448, 448)):
-        self.image_dims = image_dims
+        self.image_dims = tuple(image_dims)
 
     def get_inputs(self, mode, batch_size=None):
         import tensorflow as tf
