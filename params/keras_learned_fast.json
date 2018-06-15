@@ -1,0 +1,7 @@
+{
+  "inference_model": {
+    "implementation": "keras",
+    "learned_upsample": true
+  },
+  "train_model": {"learning_rate": 2e-4}
+}

@@ -1,0 +1,6 @@
+{
+  "inference_model": {
+    "implementation": "slim",
+    "learned_upsample": true
+  }
+}

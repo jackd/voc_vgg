@@ -1,4 +1,0 @@
-{
-  "inference_model": {"implementation": "keras"},
-  "train_model": {"learning_rate": 2e-4}
-}

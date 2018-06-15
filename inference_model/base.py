@@ -15,6 +15,77 @@ if not os.path.isdir(ws_dir):
     os.makedirs(ws_dir)
 
 
+def learned_upsample(x, stride):
+    kernel_initializer = deconv2d_bilinear_upsampling_initializer
+    n_classes = x.shape[-1].value
+    return tf.layers.conv2d_transpose(
+        x, n_classes, 2*stride, stride, padding='SAME',
+        use_bias=False, kernel_initializer=kernel_initializer)
+
+
+def fixed_upsample(x, stride):
+    return tf.image.resize_images(x, tf.shape(x)[1:3] * stride)
+
+
+def deconv2d_bilinear_upsampling_initializer(
+        shape, dtype=None, partition_info=None):
+    """
+    Initializer for bilinear upsampling via deconvolutions.
+
+    Used in some segmantic segmentation approches such as
+    [FCN](https://arxiv.org/abs/1605.06211)
+
+    See `learned_upsample` for example usage.
+
+    Args:
+        shape: list of shape
+            shape of the filters, [height, width, output_channels, in_channels]
+
+    Returns
+        kernel initializer for 2D bilinear upsampling.
+
+    Original version from a commit in
+    [tensorlayer](https://github.com/tensorlayer/tensorlayer/blob/
+    70a7017ca2473b10a229540f2f64830b8e45aa3c/tensorlayer/layers.py).
+    """
+    if shape[0] != shape[1]:
+        raise Exception(
+            'deconv2d_bilinear_upsampling_initializer only supports '
+            'symmetrical filter sizes')
+    if shape[3] < shape[2]:
+        raise Exception(
+            'deconv2d_bilinear_upsampling_initializer behaviour is not '
+            'defined for num_in_channels < num_out_channels ')
+    if dtype is None:
+        dtype = tf.float32
+
+    if not dtype.is_floating:
+        raise ValueError('dtype must be floating')
+
+    filter_size = shape[0]
+    num_out_channels = shape[2]
+    num_in_channels = shape[3]
+
+    # Create bilinear filter kernel as numpy array
+    bilinear_kernel = np.zeros(
+        [filter_size, filter_size], dtype=dtype.as_numpy_dtype)
+    scale_factor = (filter_size + 1) // 2
+    if filter_size % 2 == 1:
+        center = scale_factor - 1
+    else:
+        center = scale_factor - 0.5
+    for x in range(filter_size):
+        for y in range(filter_size):
+            bilinear_kernel[x, y] = (1 - abs(x - center) / scale_factor) * \
+                                    (1 - abs(y - center) / scale_factor)
+    weights = np.zeros(
+        (filter_size, filter_size, num_out_channels, num_in_channels))
+    for i in range(num_out_channels):
+        weights[:, :, i, i] = bilinear_kernel
+
+    return weights
+
+
 class SegmentationInferenceModel(InferenceModel):
     def get_predictions(self, features, inference):
         logits = inference
@@ -28,8 +99,9 @@ class SegmentationInferenceModel(InferenceModel):
 
 
 class VggInferenceModel(SegmentationInferenceModel):
-    def __init__(self, n_classes=21):
+    def __init__(self, n_classes=21, learned_upsample=False):
         self.n_classes = n_classes
+        self.learned_upsample = learned_upsample
 
     def _get_base_vgg(self, input_image, training, load_weights):
         raise NotImplementedError('Abstract method')
@@ -86,23 +158,23 @@ class VggInferenceModel(SegmentationInferenceModel):
                 x, 4096, 1, activation=tf.nn.relu, name='conv7',
                 kernel_initializer=w2, bias_initializer=b2)
             conv7 = tf.layers.dropout(x, rate=0.5, training=training)
-
             conv7 = tf.layers.conv2d(conv7, n_classes, 1)
-            score2 = tf.layers.conv2d_transpose(
-                conv7, n_classes, 4, 2, padding='SAME')
+
+            score2 = learned_upsample(conv7, 2)
 
             score_pool4 = tf.layers.conv2d(pool4, n_classes, 1)
             score_fused = score_pool4 + score2
-            score4 = tf.layers.conv2d_transpose(
-                score_fused, n_classes, 4, 2, padding='SAME', use_bias=False)
+            score4 = learned_upsample(score_fused, 2)
 
             score_pool3 = tf.layers.conv2d(pool3, n_classes, 1)
             score_final = score4 + score_pool3
 
-            upsample = tf.layers.conv2d_transpose(
-                score_final, n_classes, 16, 8, padding='SAME', use_bias=False)
+            if self.learned_upsample:
+                upsampled_score = learned_upsample(x, 8)
+            else:
+                upsampled_score = fixed_upsample(score_final, 8)
 
-        return upsample
+        return upsampled_score
 
     def get_inference(self, features, mode):
         logits = self._get_inference(
