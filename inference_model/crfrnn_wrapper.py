@@ -26,12 +26,15 @@ class CrfRnnInferenceModel(SegmentationInferenceModel):
     def get_warm_start_settings(self):
         if self._warm_start_settings is None:
             settings = self._base_model.get_warm_start_settings()
-            if isinstance(settings, tf.estimator.WarmsStartSettings):
+            if isinstance(settings, tf.estimator.WarmStartSettings):
                 settings = settings.ckpt_to_initialize_from
+        else:
+            settings = self._warm_start_settings
 
+        if isinstance(settings, (str, unicode)):
+            # TODO: maybe we want to load crf_rnn params from here too?
             return tf.estimator.WarmStartSettings(
                 ckpt_to_initialize_from=settings,
                 vars_to_warm_start='vgg.*')
-
         else:
-            return self._warm_start_settings
+            return settings
