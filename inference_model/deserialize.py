@@ -14,6 +14,9 @@ def get_inference_model(implementation='keras', **kwargs):
         return VggSlimInferenceModel(**kwargs)
     elif implementation == 'crf_rnn':
         return get_crfrnn_wrapped_inference_model(**kwargs)
+    elif implementation == 'deeplab':
+        from .deeplab import DeeplabInferenceModel
+        return DeeplabInferenceModel(**kwargs)
     else:
         raise NotImplementedError(
             'Unrecognized implementation "%s"' % implementation)

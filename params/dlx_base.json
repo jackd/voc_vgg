@@ -1,0 +1,6 @@
+{
+  "inference_model": {
+    "implementation": "deeplab",
+    "model_variant": "xception_65"
+  }
+}

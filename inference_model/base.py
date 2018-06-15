@@ -27,6 +27,10 @@ def fixed_upsample(x, stride):
     return tf.image.resize_images(x, tf.shape(x)[1:3] * stride)
 
 
+def upsample(x, stride, learned):
+    return (learned_upsample if learned else fixed_upsample)(x, stride)
+
+
 def deconv2d_bilinear_upsampling_initializer(
         shape, dtype=None, partition_info=None):
     """
@@ -168,11 +172,8 @@ class VggInferenceModel(SegmentationInferenceModel):
 
             score_pool3 = tf.layers.conv2d(pool3, n_classes, 1)
             score_final = score4 + score_pool3
-
-            if self.learned_upsample:
-                upsampled_score = learned_upsample(x, 8)
-            else:
-                upsampled_score = fixed_upsample(score_final, 8)
+            upsampled_score = upsample(
+                score_final, 8, learned=self.learned_upsample)
 
         return upsampled_score
 
