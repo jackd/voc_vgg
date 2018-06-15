@@ -1,0 +1,7 @@
+{
+  "inference_model": {
+    "implementation": "deeplab",
+    "model_variant": "xception_65",
+    "depth_multiplier": 0.25
+  }
+}

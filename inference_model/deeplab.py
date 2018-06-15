@@ -26,7 +26,7 @@ class DeeplabInferenceModel(SegmentationInferenceModel):
         features, _ = extract_features(
             image, model_variant=self._model_variant, preprocess_images=False,
             num_classes=self._n_classes, is_training=mode == 'train',
-            depth_multiplier=self._depth_multiplizer)
+            depth_multiplier=self._depth_multiplier)
         if features.shape[-1].value != self._n_classes:
             features = tf.layers.conv2d(features, self._n_classes, 1)
         logits = upsample(features, 8, self._learned_upsample)
