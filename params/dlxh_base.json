@@ -1,7 +1,9 @@
 {
   "inference_model": {
     "implementation": "deeplab",
-    "model_variant": "xception_65",
-    "depth_multiplier": 0.5
+    "model_variant": "xception_65"
+  },
+  "train_model": {
+    "batch_size": 4
   }
 }

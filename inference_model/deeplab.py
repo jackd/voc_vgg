@@ -14,6 +14,8 @@ class DeeplabInferenceModel(SegmentationInferenceModel):
         if model_variant not in variants:
             raise ValueError('Invalid model_variant "%s." Must be in %s'
                              % (model_variant, str(variants)))
+        if model_variant != 'mobilenet_v2' and depth_multiplier != 1:
+            raise ValueError('depth_multiplier only applies for mobilenet_v2')
         self._n_classes = n_classes
         self._learned_upsample = False
         self._model_variant = model_variant
