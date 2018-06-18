@@ -27,8 +27,7 @@ def get_confusion_total(predictions, labels, num_classes):
             trainable=False, collections=collections,
             initializer=tf.zeros_initializer)
         updated_total = tf.assign_add(total, confusion)
-    update_op = updated_total.op
-    return updated_total, update_op
+    return total, updated_total
 
 
 def get_eval_metric_ops(predictions, labels):
@@ -42,25 +41,25 @@ def get_eval_metric_ops(predictions, labels):
     mean_per_class_accuracy = tf.metrics.mean_per_class_accuracy(
         labels, pred, n_classes)
     confusion_total, update_op = get_confusion_total(pred, labels, n_classes)
-    with tf.control_dependencies(update_op):
+    with tf.control_dependencies([update_op]):
         intersection = tf.diag_part(confusion_total)
         union = tf.reduce_sum(confusion_total, axis=0) + \
             tf.reduce_sum(confusion_total, axis=1) - intersection
         iou = tf.cast(intersection, tf.float32) / tf.cast(union, tf.float32)
         custom_mean_iou = tf.reduce_mean(iou)
-        custom_mean_iou_nonbg = tf.reduce_mean(iou[1:])
+        # custom_mean_iou_nonbg = tf.reduce_mean(iou[1:])
 
     # with tf.control_dependencies([confusion_total]):
     #     no_op = tf.no_op()
 
     custom_mean_iou_metric = custom_mean_iou, update_op
-    custom_mean_iou_nonbg_metric = custom_mean_iou_nonbg, update_op
+    # custom_mean_iou_nonbg_metric = custom_mean_iou_nonbg, confusion_total
     return dict(
         accuracy=accuracy,
         mean_iou=mean_iou,
         mean_per_class_accuracy=mean_per_class_accuracy,
         custom_mean_iou=custom_mean_iou_metric,
-        custom_mean_iou_nobg=custom_mean_iou_nonbg_metric
+        # custom_mean_iou_nobg=custom_mean_iou_nonbg_metric
     )
 
 
