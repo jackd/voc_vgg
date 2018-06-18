@@ -18,9 +18,13 @@ def get_confusion_total(predictions, labels, num_classes):
     import tensorflow as tf
     with tf.variable_scope('total_confusion'):
         confusion = tf.confusion_matrix(labels, predictions, num_classes)
+        collections = (
+            tf.GraphKeys.LOCAL_VARIABLES,
+            tf.GraphKeys.METRIC_VARIABLES,
+        )
         total = tf.get_variable(
             name='total', shape=(num_classes, num_classes), dtype=tf.int32,
-            trainable=False, collections=(tf.GraphKeys.METRIC_VARIABLES,),
+            trainable=False, collections=collections,
             initializer=tf.zeros_initializer)
         updated_total = tf.assign_add(total, confusion)
     return updated_total
