@@ -27,9 +27,9 @@ def add_reg_losses(weight_decay):
         variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
         variables = [
             v for v in variables if 'weights' in v.name or 'kernel' in v.name]
-        # for v in variables:
-        #     print(v)
-        #     reg(v)
+        for v in variables:
+            reg(v)
+            # print(v)
         # print('--')
         # for v in tf.get_collection(tf.GraphKeys.LOSSES):
         #     print(v)
