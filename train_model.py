@@ -8,10 +8,15 @@ from tf_template import TrainModel
 def inference_loss(inference, labels):
     import tensorflow as tf
     valid_mask = labels['valid_mask']
+    any_valid = tf.reduce_any(valid_mask)
     logits = tf.boolean_mask(inference, valid_mask)
     labels = tf.boolean_mask(labels['segmentation'], valid_mask)
-    return tf.losses.sparse_softmax_cross_entropy(
-        logits=logits, labels=labels)
+    return tf.cond(
+        any_valid,
+        lambda: tf.losses.sparse_softmax_cross_entropy(
+            logits=logits, labels=labels),
+        lambda: tf.zeros(shape=(), dtype=tf.float32)
+    )
 
 
 def add_reg_losses(weight_decay):
