@@ -14,6 +14,18 @@ for d in (params_dir, models_dir):
         os.makedirs(d)
 
 
+def get_confusion_total(predictions, labels, num_classes):
+    import tensorflow as tf
+    with tf.variable_scope('total_confusion'):
+        confusion = tf.confusion_matrix(labels, predictions, num_classes)
+        total = tf.get_variable(
+            name='total', shape=(num_classes, num_classes), dtype=tf.int32,
+            trainable=False, collections=(tf.GraphKeys.METRIC_VARIABLES,),
+            initializer=tf.zeros_initializer)
+        updated_total = tf.assign_add(total, confusion)
+    return updated_total
+
+
 def get_eval_metric_ops(predictions, labels):
     import tensorflow as tf
     n_classes = 21
@@ -24,10 +36,24 @@ def get_eval_metric_ops(predictions, labels):
     mean_iou = tf.metrics.mean_iou(labels, pred, n_classes)
     mean_per_class_accuracy = tf.metrics.mean_per_class_accuracy(
         labels, pred, n_classes)
+    confusion_total = get_confusion_total(pred, labels, n_classes)
+    intersection = tf.diag_part(confusion_total)
+    union = tf.reduce_sum(confusion_total, axis=0) + \
+        tf.reduce_sum(confusion_total, axis=1) - intersection
+    iou = tf.cast(intersection, tf.float32) / tf.cast(union, tf.float32)
+    custom_mean_iou = tf.reduce_mean(iou)
+    custom_mean_iou_metric = custom_mean_iou, confusion_total
+
+    custom_mean_iou_nonbg = tf.reduce_mean(iou[1:])
+    with tf.control_dependencies([confusion_total]):
+        no_op = tf.no_op()
+    custom_mean_iou_nonbg_metric = custom_mean_iou_nonbg, no_op
     return dict(
         accuracy=accuracy,
         mean_iou=mean_iou,
-        mean_per_class_accuracy=mean_per_class_accuracy
+        mean_per_class_accuracy=mean_per_class_accuracy,
+        custom_mean_iou=custom_mean_iou_metric,
+        custom_mean_iou_nobg=custom_mean_iou_nonbg_metric
     )
 
 
