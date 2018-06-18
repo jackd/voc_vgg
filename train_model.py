@@ -14,12 +14,30 @@ def inference_loss(inference, labels):
         logits=logits, labels=labels)
 
 
+def add_reg_losses(weight_decay):
+    import tensorflow as tf
+    # raise Exception()
+    if weight_decay is not None and weight_decay > 0:
+        reg = tf.contrib.layers.l2_regularizer(weight_decay)
+        variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+        variables = [
+            v for v in variables if 'weights' in v.name or 'kernel' in v.name]
+        for v in variables:
+            reg(v)
+        # print('--')
+        # for v in tf.get_collection(tf.GraphKeys.LOSSES):
+        #     print(v)
+        # exit()
+
+
 def get_train_model(
-        batch_size=8, max_steps=150000, optimizer_key='adam',
-        learning_rate=1e-4):
+        batch_size=8, max_steps=150000, weight_decay=None,
+        optimizer_key='adam', **optimizer_kwargs):
     from tf_template.deserialize import deserialize_optimization_op_fn
+    optimizer_kwargs.setdefault('learning_rate', 1e-4)
     return TrainModel.from_fns(
-        inference_loss,
+        lambda inf, lab: inference_loss(inf, lab, weight_decay),
         deserialize_optimization_op_fn(
-            key=optimizer_key, learning_rate=learning_rate),
-        batch_size, max_steps)
+            key=optimizer_key, **optimizer_kwargs),
+        batch_size, max_steps,
+        before_loss_calc_fn=lambda: add_reg_losses(weight_decay))

@@ -1,6 +1,6 @@
 {
   "inference_model": {
     "implementation": "keras",
-    "learned_upsample": true
+    "learned_final_upsample": true
   }
 }

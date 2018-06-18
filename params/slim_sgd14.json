@@ -1,0 +1,13 @@
+{
+  "inference_model": {
+    "implementation": "slim",
+    "learned_final_upsample": false,
+    "learned_intermediate_upsample": false
+  },
+  "train_model": {
+    "optimizer_key": "momentum",
+    "weight_decay": 5e-4,
+    "momentum": 0.99,
+    "learning_rate": 1e-14
+  }
+}

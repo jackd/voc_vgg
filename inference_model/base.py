@@ -103,9 +103,14 @@ class SegmentationInferenceModel(InferenceModel):
 
 
 class VggInferenceModel(SegmentationInferenceModel):
-    def __init__(self, n_classes=21, learned_upsample=False):
+    def __init__(
+            self,
+            n_classes=21,
+            learned_intermediate_upsample=True,
+            learned_final_upsample=False):
         self.n_classes = n_classes
-        self.learned_upsample = learned_upsample
+        self.learned_intermediate_upsample = learned_intermediate_upsample
+        self.learned_final_upsample = learned_final_upsample
 
     def _get_base_vgg(self, input_image, training, load_weights):
         raise NotImplementedError('Abstract method')
@@ -164,16 +169,18 @@ class VggInferenceModel(SegmentationInferenceModel):
             conv7 = tf.layers.dropout(x, rate=0.5, training=training)
             conv7 = tf.layers.conv2d(conv7, n_classes, 1)
 
-            score2 = learned_upsample(conv7, 2)
+            score2 = upsample(
+                conv7, 2, learned=self.learned_intermediate_upsample)
 
             score_pool4 = tf.layers.conv2d(pool4, n_classes, 1)
             score_fused = score_pool4 + score2
-            score4 = learned_upsample(score_fused, 2)
+            score4 = upsample(
+                score_fused, 2, learned=self.learned_intermediate_upsample)
 
             score_pool3 = tf.layers.conv2d(pool3, n_classes, 1)
             score_final = score4 + score_pool3
             upsampled_score = upsample(
-                score_final, 8, learned=self.learned_upsample)
+                score_final, 8, learned=self.learned_final_upsample)
 
         return upsampled_score
 
