@@ -27,8 +27,9 @@ def add_reg_losses(weight_decay):
         variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
         variables = [
             v for v in variables if 'weights' in v.name or 'kernel' in v.name]
-        for v in variables:
-            reg(v)
+        # for v in variables:
+        #     print(v)
+        #     reg(v)
         # print('--')
         # for v in tf.get_collection(tf.GraphKeys.LOSSES):
         #     print(v)
@@ -41,7 +42,7 @@ def get_train_model(
     from tf_template.deserialize import deserialize_optimization_op_fn
     optimizer_kwargs.setdefault('learning_rate', 1e-4)
     return TrainModel.from_fns(
-        lambda inf, lab: inference_loss(inf, lab, weight_decay),
+        inference_loss,
         deserialize_optimization_op_fn(
             key=optimizer_key, **optimizer_kwargs),
         batch_size, max_steps,
