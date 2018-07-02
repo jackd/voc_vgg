@@ -63,8 +63,12 @@ def get_eval_metric_ops(predictions, labels):
     )
 
 
+def get_params_path(model_id):
+    return os.path.join(params_dir, '%s.json' % model_id)
+
+
 def load_params(model_id):
-    params_path = os.path.join(params_dir, '%s.json' % model_id)
+    params_path = get_params_path(model_id)
     if not os.path.isfile(params_path):
         raise ValueError('No params at %s' % params_path)
     with open(params_path, 'r') as fp:
