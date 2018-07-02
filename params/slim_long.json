@@ -1,0 +1,6 @@
+{
+  "inference_model": {"implementation": "slim"},
+  "train_model": {
+    "max_steps": 300000
+  }
+}
